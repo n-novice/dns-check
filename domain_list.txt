@@ -1,0 +1,4 @@
+a,www.yahoo.co.jp
+a,www.google.com
+mx,google.com
+txt,google.com
