@@ -1,1 +1,1 @@
-# test
+# DNS check test (dig)
