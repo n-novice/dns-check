@@ -1,0 +1,58 @@
+Sub SplitByFunctionWithFormatting()
+
+    Dim wsSource As Worksheet
+    Dim wbNew As Workbook
+    Dim wsNew As Worksheet
+    Dim LastRow As Long
+    Dim i As Long
+    Dim FileLocation As String
+    Dim FileName As String
+    Dim rngToCopy As Range, rngDestination As Range
+
+    ' 画面の更新を無効にします
+    Application.ScreenUpdating = False
+
+    ' 入力シートを指定します
+    Set wsSource = ThisWorkbook.Sheets("Sheet1")
+
+    ' 入力ファイルが保存されている場所を取得します
+    FileLocation = ThisWorkbook.Path & "\"
+
+    ' 最終行を取得します
+    LastRow = wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row
+
+    ' 機能ごとの列をループします（2列目から開始）
+    For i = 2 To wsSource.Cells(1, wsSource.Columns.Count).End(xlToLeft).Column
+
+        ' 新しいワークブックを作成します
+        Set wbNew = Workbooks.Add
+        Set wsNew = wbNew.Sheets(1)
+
+        ' 入力シートから列のデータと書式を新しいワークブックにコピーします
+        Set rngToCopy = wsSource.Range(wsSource.Cells(1, 1), wsSource.Cells(LastRow, 1))
+        Set rngDestination = wsNew.Cells(1, 1)
+        rngToCopy.Copy
+        rngDestination.PasteSpecial Paste:=xlPasteAllUsingSourceTheme
+
+        Set rngToCopy = wsSource.Range(wsSource.Cells(1, i), wsSource.Cells(LastRow, i))
+        Set rngDestination = wsNew.Cells(1, 2)
+        rngToCopy.Copy
+        rngDestination.PasteSpecial Paste:=xlPasteAllUsingSourceTheme
+
+        ' A1セルを選択します
+        wsNew.Range("A1").Select
+
+        ' ファイル名を設定します
+        FileName = wsSource.Cells(1, i).Value & ".xlsx"
+
+        ' 新しいワークブックを保存します
+        wbNew.SaveAs FileLocation & FileName, FileFormat:=51 ' 51 = .xlsx format
+        wbNew.Close SaveChanges:=False
+
+    Next i
+
+    ' 画面の更新を再度有効にします
+    Application.ScreenUpdating = True
+    Application.CutCopyMode = False
+
+End Sub
