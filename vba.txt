@@ -15,7 +15,7 @@ Sub SplitByFunctionWithFormatting()
     Application.ScreenUpdating = False
 
     ' 入力シートを指定します
-    Set wsSource = ThisWorkbook.Sheets("Sheet1")
+    Set wsSource = ThisWorkbook.Sheets("Sheet2")
 
     ' 入力ファイルが保存されている場所を取得します
     FileLocation = ThisWorkbook.Path & "\"
@@ -24,8 +24,8 @@ Sub SplitByFunctionWithFormatting()
     LastRow = wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row
     LastColumn = wsSource.Cells(5, wsSource.Columns.Count).End(xlToLeft).Column
 
-    ' 機能ごとの列をループします（9列目から開始）
-    For i = 9 To LastColumn
+    ' 機能ごとの列をループします（9列目から開始、最終の２列は除く）
+    For i = 9 To LastColumn - 2
 
         ' 新しいワークブックを作成します
         Set wbNew = Workbooks.Add
@@ -34,15 +34,19 @@ Sub SplitByFunctionWithFormatting()
         ' 既存のシートから説明とヘッダーをコピー
         wsSource.Range("A1:H" & LastRow).Copy wsNew.Range("A1")
 
-        ' 機能列のデータを新しいワークブックにコピー
+        ' 機能列のデータを新しいワークブックの9列目にコピー
         wsSource.Range(wsSource.Cells(1, i), wsSource.Cells(LastRow, i)).Copy wsNew.Cells(1, 9)
+
+        ' 元のファイルの最終列から２列を新しいワークブックの10列目と11列目にコピー
+        wsSource.Range(wsSource.Cells(1, LastColumn - 1), wsSource.Cells(LastRow, LastColumn - 1)).Copy wsNew.Cells(1, 10)
+        wsSource.Range(wsSource.Cells(1, LastColumn), wsSource.Cells(LastRow, LastColumn)).Copy wsNew.Cells(1, 11)
 
         ' Copy row heights and column widths
         For r = 1 To LastRow
             wsNew.Rows(r).RowHeight = wsSource.Rows(r).RowHeight
         Next r
 
-        For c = 1 To 9
+        For c = 1 To 11 ' 11列までの幅をコピー
             wsNew.Columns(c).ColumnWidth = wsSource.Columns(c).ColumnWidth
         Next c
 
@@ -80,3 +84,4 @@ Function CleanFileName(ByVal s As String) As String
 
     CleanFileName = s
 End Function
+
