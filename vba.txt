@@ -7,52 +7,66 @@ Sub SplitByFunctionWithFormatting()
     Dim i As Long
     Dim FileLocation As String
     Dim FileName As String
-    Dim rngToCopy As Range, rngDestination As Range
+    Dim LastColumn As Long
 
     ' 画面の更新を無効にします
     Application.ScreenUpdating = False
 
     ' 入力シートを指定します
-    Set wsSource = ThisWorkbook.Sheets("Sheet1")
+    Set wsSource = ThisWorkbook.Sheets("Sheet2")
 
     ' 入力ファイルが保存されている場所を取得します
     FileLocation = ThisWorkbook.Path & "\"
 
-    ' 最終行を取得します
+    ' 最終行と最終列を取得します
     LastRow = wsSource.Cells(wsSource.Rows.Count, 1).End(xlUp).Row
+    LastColumn = wsSource.Cells(5, wsSource.Columns.Count).End(xlToLeft).Column
 
-    ' 機能ごとの列をループします（2列目から開始）
-    For i = 2 To wsSource.Cells(1, wsSource.Columns.Count).End(xlToLeft).Column
+    ' 機能ごとの列をループします（9列目から開始）
+    For i = 9 To LastColumn
 
         ' 新しいワークブックを作成します
         Set wbNew = Workbooks.Add
         Set wsNew = wbNew.Sheets(1)
 
-        ' 入力シートから列のデータと書式を新しいワークブックにコピーします
-        Set rngToCopy = wsSource.Range(wsSource.Cells(1, 1), wsSource.Cells(LastRow, 1))
-        Set rngDestination = wsNew.Cells(1, 1)
-        rngToCopy.Copy
-        rngDestination.PasteSpecial Paste:=xlPasteAllUsingSourceTheme
+        ' 既存のシートから説明とヘッダーをコピー
+        wsSource.Range("A1:H" & LastRow).Copy wsNew.Range("A1")
 
-        Set rngToCopy = wsSource.Range(wsSource.Cells(1, i), wsSource.Cells(LastRow, i))
-        Set rngDestination = wsNew.Cells(1, 2)
-        rngToCopy.Copy
-        rngDestination.PasteSpecial Paste:=xlPasteAllUsingSourceTheme
+        ' 機能列のデータを新しいワークブックにコピー
+        wsSource.Range(wsSource.Cells(1, i), wsSource.Cells(LastRow, i)).Copy wsNew.Cells(1, 9)
 
-        ' A1セルを選択します
+        ' A1セルを選択
         wsNew.Range("A1").Select
 
-        ' ファイル名を設定します
-        FileName = wsSource.Cells(1, i).Value & ".xlsx"
+        ' 新しいワークブックのファイル名を設定します
+        FileName = CleanFileName(wsNew.Cells(5, 9).Value) & ".xlsx"
 
         ' 新しいワークブックを保存します
-        wbNew.SaveAs FileLocation & FileName, FileFormat:=51 ' 51 = .xlsx format
-        wbNew.Close SaveChanges:=False
+        wbNew.SaveAs FileLocation & FileName, FileFormat:=xlOpenXMLWorkbook
+
+        ' 新しいワークブックを閉じます
+        wbNew.Close
 
     Next i
 
-    ' 画面の更新を再度有効にします
-    Application.ScreenUpdating = True
+    ' クリップボードをクリアします
     Application.CutCopyMode = False
 
+    ' 画面の更新を再開します
+    Application.ScreenUpdating = True
+
 End Sub
+
+' ファイル名として使用できない文字を取り除くヘルパー関数
+Function CleanFileName(ByVal s As String) As String
+    Dim InvalidChars As String
+    Dim i As Integer
+    InvalidChars = "\/:*?""<>|" & Chr(10) & Chr(13) ' 無効な文字と改行文字を追加
+    
+    For i = 1 To Len(InvalidChars)
+        s = Replace(s, Mid(InvalidChars, i, 1), "")
+    Next i
+
+    CleanFileName = s
+End Function
+
