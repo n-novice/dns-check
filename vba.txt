@@ -8,12 +8,14 @@ Sub SplitByFunctionWithFormatting()
     Dim FileLocation As String
     Dim FileName As String
     Dim LastColumn As Long
+    Dim r As Long
+    Dim c As Long
 
     ' 画面の更新を無効にします
     Application.ScreenUpdating = False
 
     ' 入力シートを指定します
-    Set wsSource = ThisWorkbook.Sheets("Sheet2")
+    Set wsSource = ThisWorkbook.Sheets("Sheet1")
 
     ' 入力ファイルが保存されている場所を取得します
     FileLocation = ThisWorkbook.Path & "\"
@@ -34,6 +36,15 @@ Sub SplitByFunctionWithFormatting()
 
         ' 機能列のデータを新しいワークブックにコピー
         wsSource.Range(wsSource.Cells(1, i), wsSource.Cells(LastRow, i)).Copy wsNew.Cells(1, 9)
+
+        ' Copy row heights and column widths
+        For r = 1 To LastRow
+            wsNew.Rows(r).RowHeight = wsSource.Rows(r).RowHeight
+        Next r
+
+        For c = 1 To 9
+            wsNew.Columns(c).ColumnWidth = wsSource.Columns(c).ColumnWidth
+        Next c
 
         ' A1セルを選択
         wsNew.Range("A1").Select
@@ -69,4 +80,3 @@ Function CleanFileName(ByVal s As String) As String
 
     CleanFileName = s
 End Function
-
